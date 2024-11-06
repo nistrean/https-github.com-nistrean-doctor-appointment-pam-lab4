@@ -1,0 +1,445 @@
+import 'package:doctor_appointment/presentation/blocs/banner_bloc.dart';
+import 'package:doctor_appointment/presentation/home_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'data/category_data_source.dart';
+import 'domain/repositories/category_repository.dart';
+import 'presentation/blocs/category_bloc.dart';
+import 'data/banner_data_source.dart';
+import 'doctor_bloc.dart';
+import 'nearby_center_model.dart';
+
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<BannerBloc>(
+          create: (context) =>
+          BannerBloc(BannerDataSource())..add(LoadBannersEvent()),
+        ),
+        BlocProvider<CategoryBloc>(
+          create: (context) => CategoryBloc(CategoryDataSource())
+            ..add(LoadCategoryEvent()),
+        ),
+        BlocProvider<DoctorBloc>(
+          create: (context) =>
+          DoctorBloc()..add(DoctorEvent()),
+        ),
+        BlocProvider<NearbyCenterBloc>(
+          create: (context) =>
+          NearbyCenterBloc()..add(NearbyCenterEvent()),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Doctor Appointment App',
+        theme: ThemeData(
+          primarySwatch: Colors.teal,
+        ),
+        home: HomePage(),
+      ),
+    );
+  }
+}
+
+//
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: Colors.white,
+//         elevation: 0,
+//         title: const Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   'Location',
+//                   style: TextStyle(
+//                     fontSize: 16,
+//                     color: Color.fromRGBO(28, 42, 59, 1),
+//                   ),
+//                 ),
+//                 Row(
+//                   children: [
+//                     Icon(Icons.location_on,
+//                         color: Color.fromRGBO(28, 42, 59, 1)),
+//                     SizedBox(width: 5),
+//                     Text(
+//                       'Seattle, USA',
+//                       style: TextStyle(
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.bold,
+//                         color: Color.fromRGBO(28, 42, 59, 1),
+//                       ),
+//                     ),
+//                     Icon(Icons.keyboard_arrow_down,
+//                         color: Color.fromRGBO(28, 42, 59, 1)),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//             Stack(
+//               alignment: Alignment.center,
+//               children: [
+//                 CircleAvatar(
+//                   radius: 16,
+//                   backgroundColor: Color(0xFFF1F3F7),
+//                   child: Icon(Icons.notifications,
+//                       color: Color.fromRGBO(28, 42, 59, 1)),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//       body: ListView(padding: const EdgeInsets.all(10.0), children: [
+//         // Search Bar
+//         Container(
+//           padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//           decoration: BoxDecoration(
+//             color: const Color.fromRGBO(242, 243, 245, 1),
+//             borderRadius: BorderRadius.circular(30.0),
+//           ),
+//           child: const TextField(
+//             decoration: InputDecoration(
+//               hintText: 'Search doctor...',
+//               border: InputBorder.none,
+//               icon: Icon(Icons.search, color: Color.fromRGBO(157, 164, 176, 1)),
+//             ),
+//           ),
+//         ),
+//         const SizedBox(height: 20.0),
+//
+//         BannersCarousel(),
+//
+//         const Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             Text(
+//               'Categories',
+//               style: TextStyle(
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//                 color: Color.fromRGBO(28, 42, 59, 1),
+//               ),
+//             ),
+//             Text(
+//               'See All',
+//               style: TextStyle(
+//                 fontSize: 16,
+//                 color: Color.fromRGBO(157, 164, 176, 1),
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: 10),
+//
+//         // Categories Grid
+//         SizedBox(
+//           height: 220,
+//           child: CategoriesGrid(),
+//         ),
+//
+//         // nearby medical centers Title
+//         const Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             Text(
+//               'Nearby Medical Centers',
+//               style: TextStyle(
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//                 color: Color.fromRGBO(28, 42, 59, 1),
+//               ),
+//             ),
+//             Text(
+//               'See All',
+//               style: TextStyle(
+//                 fontSize: 16,
+//                 color: Color.fromRGBO(157, 164, 176, 1),
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: 10),
+//         NearbyCentersList(),
+//
+//         DoctorsList(),
+//       ]),
+//     );
+//   }
+// }
+
+//
+// class CategoriesGrid extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocBuilder<CategoryBloc, CategoryState>(
+//       builder: (context, state) {
+//         if (state.categories.isEmpty) {
+//           return const Center(child: CircularProgressIndicator());
+//         }
+//         return GridView.builder(
+//           physics: const NeverScrollableScrollPhysics(),
+//           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//             crossAxisCount: 4,
+//             crossAxisSpacing: 4,
+//             mainAxisSpacing: 18,
+//             childAspectRatio: 1,
+//           ),
+//           itemCount: state.categories.length,
+//           itemBuilder: (context, index) {
+//             final category = state.categories[index];
+//             return Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 SizedBox(
+//                   width: 80,
+//                   height: 65,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(4.0),
+//                     child: Image.asset(
+//                       category.icon,
+//                       fit: BoxFit.contain,
+//                     ),
+//                   ),
+//                 ),
+//                 const SizedBox(height: 5),
+//                 Text(
+//                   category.title,
+//                   style: const TextStyle(
+//                     fontSize: 14,
+//                     color: Color(0xFF1C2A3B),
+//                   ),
+//                   textAlign: TextAlign.center,
+//                   maxLines: 1,
+//                   overflow: TextOverflow.ellipsis,
+//                 ),
+//               ],
+//             );
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
+//
+// class NearbyCentersList extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocBuilder<NearbyCenterBloc, NearbyCenterState>(
+//       builder: (context, state) {
+//         if (state.centers.isEmpty) {
+//           return Center(child: CircularProgressIndicator());
+//         }
+//         return SizedBox(
+//           height: 310,
+//           child: ListView.builder(
+//             scrollDirection: Axis.horizontal,
+//             itemCount: state.centers.length,
+//             itemBuilder: (context, index) {
+//               final center = state.centers[index];
+//               return Padding(
+//                 padding: const EdgeInsets.only(right: 16.0),
+//                 child: SizedBox(
+//                   width: 220,
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Stack(
+//                         children: [
+//                           ClipRRect(
+//                             borderRadius: BorderRadius.circular(16.0),
+//                             child: Image.asset(
+//                               center.image,
+//                               height: 180,
+//                               width: double.infinity,
+//                               fit: BoxFit.cover,
+//                             ),
+//                           ),
+//                           Positioned(
+//                             top: 10,
+//                             right: 10,
+//                             child: CircleAvatar(
+//                               backgroundColor:
+//                                   const Color.fromRGBO(175, 184, 186, 1),
+//                               child: IconButton(
+//                                 icon: const Icon(Icons.favorite_border,
+//                                     color: Colors.white),
+//                                 onPressed: () {
+//                                   print('Added to favorites!');
+//                                 },
+//                               ),
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Text(
+//                         center.title,
+//                         style: const TextStyle(
+//                           fontSize: 18,
+//                           fontWeight: FontWeight.bold,
+//                           color: Color.fromRGBO(28, 42, 59, 1),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 4),
+//                       Text(
+//                         center.locationName,
+//                         style: const TextStyle(
+//                           fontSize: 14,
+//                           color: Color.fromRGBO(157, 164, 176, 1),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 4),
+//                       Row(
+//                         children: [
+//                           const Icon(Icons.star,
+//                               color: Colors.orange, size: 16),
+//                           const SizedBox(width: 4),
+//                           Text(
+//                               '${center.reviewRate} (${center.countReviews} Reviews)'),
+//                         ],
+//                       ),
+//                       const SizedBox(height: 4),
+//                       Text('${center.distanceKm} km'),
+//                     ],
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
+//
+// class DoctorsList extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocBuilder<DoctorBloc, DoctorState>(
+//       builder: (context, state) {
+//         if (state.doctors.isEmpty) {
+//           return Center(child: CircularProgressIndicator());
+//         }
+//         return SizedBox(
+//           height: 740, // Set the height for the vertical list
+//           child: ListView.builder(
+//             itemCount: state.doctors.length,
+//             itemBuilder: (context, index) {
+//               final doctor = state.doctors[index];
+//               return Padding(
+//                 padding: const EdgeInsets.symmetric(vertical: 8.0),
+//                 child: Stack(
+//                   children: [
+//                     Card(
+//                       elevation: 2,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(16.0),
+//                       ),
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(12.0),
+//                         child: Row(
+//                           children: [
+//                             ClipRRect(
+//                               borderRadius: BorderRadius.circular(12.0),
+//                               child: Image.asset(
+//                                 doctor.image,
+//                                 height: 90,
+//                                 width: 90,
+//                                 fit: BoxFit.cover,
+//                               ),
+//                             ),
+//                             const SizedBox(width: 16),
+//                             Expanded(
+//                               child: Column(
+//                                 crossAxisAlignment: CrossAxisAlignment.start,
+//                                 children: [
+//                                   Text(
+//                                     doctor.fullName,
+//                                     style: const TextStyle(
+//                                       fontSize: 18,
+//                                       fontWeight: FontWeight.bold,
+//                                       color: Colors.black,
+//                                     ),
+//                                   ),
+//                                   const SizedBox(height: 4),
+//                                   Text(
+//                                     doctor.typeOfDoctor,
+//                                     style: const TextStyle(
+//                                       fontSize: 14,
+//                                       color: Colors.grey,
+//                                     ),
+//                                   ),
+//                                   const SizedBox(height: 4),
+//                                   Row(
+//                                     children: [
+//                                       const Icon(Icons.location_on,
+//                                           size: 16, color: Colors.grey),
+//                                       const SizedBox(width: 4),
+//                                       Expanded(
+//                                         child: Text(
+//                                           '${doctor.locationOfCenter}',
+//                                           style: const TextStyle(
+//                                             fontSize: 12,
+//                                             color: Colors.grey,
+//                                           ),
+//                                           overflow: TextOverflow.ellipsis,
+//                                         ),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                   const SizedBox(height: 8),
+//                                   Row(
+//                                     children: [
+//                                       const Icon(Icons.star,
+//                                           color: Colors.orange, size: 16),
+//                                       const SizedBox(width: 4),
+//                                       Text(
+//                                         '${doctor.reviewRate}',
+//                                         style: const TextStyle(fontSize: 14),
+//                                       ),
+//                                       const SizedBox(width: 8),
+//                                       Text('(${doctor.reviewsCount} Reviews)'),
+//                                     ],
+//                                   ),
+//                                 ],
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                     Positioned(
+//                       top: 8,
+//                       right: 8,
+//                       child: IconButton(
+//                         icon: const Icon(Icons.favorite_border,
+//                             color: Colors.grey),
+//                         onPressed: () {
+//                           print('Added to favorites!');
+//                         },
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               );
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }

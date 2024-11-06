@@ -1,0 +1,11 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import '../domain/models/banner_model.dart';
+
+class BannerLocalDataSource {
+  Future<List<BannerModel>> getBanners() async {
+    final jsonString = await rootBundle.loadString('assets/v1.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    return jsonData.map((json) => BannerModel.fromJson(json)).toList();
+  }
+}

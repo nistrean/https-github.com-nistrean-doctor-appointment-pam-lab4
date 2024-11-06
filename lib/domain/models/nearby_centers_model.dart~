@@ -1,0 +1,20 @@
+class NearbyCentersModel {
+  final String image;
+  final String title;
+  final String location_name;
+  final int review_rate
+
+  BannerModel({
+    required this.title,
+    required this.description,
+    required this.image,
+  });
+
+  factory BannerModel.fromJson(Map<String, dynamic> json) {
+    return BannerModel(
+      title: json['title'],
+      description: json['description'],
+      image: json['image'],
+    );
+  }
+}

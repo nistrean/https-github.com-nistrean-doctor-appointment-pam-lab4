@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import 'banner_bloc.dart';
+
+class BannersCarousel extends StatefulWidget {
+  @override
+  _BannersCarouselState createState() => _BannersCarouselState();
+}
+
+class _BannersCarouselState extends State<BannersCarousel> {
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    print("PageController initialized"); // Debug line
+
+    _pageController.addListener(() {
+      int pageIndex = _pageController.page!.round();
+      context.read<BannerBloc>().add(ChangePageEvent(pageIndex));
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<BannerBloc, BannerState>(
+      builder: (context, state) {
+        if (state.banners.isEmpty) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: state.banners.length,
+                itemBuilder: (context, index) {
+                  final banner = state.banners[index];
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Stack(
+                      children: [
+                        Image.asset(
+                          banner.image,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.black.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 70,
+                          left: 16,
+                          right: 16,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                banner.title,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                banner.description,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 10),
+            SmoothPageIndicator(
+              controller: _pageController, // Ensure this is used correctly
+              count: state.banners.length,
+              effect: ExpandingDotsEffect(
+                dotHeight: 8,
+                dotWidth: 8,
+                activeDotColor: Colors.teal,
+                dotColor: Colors.grey.shade300,
+              ),
+            ),
+
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+}
